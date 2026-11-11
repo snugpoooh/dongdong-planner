@@ -111,7 +111,7 @@ export function PrintRoot() {
     style.textContent = `@page { size: A4 ${ORIENT[print.kind]}; margin: 9mm; }`;
     document.head.appendChild(style);
     const prevTitle = document.title;
-    document.title = `동동 - ${KIND_LABEL[print.kind]} 플래너 - ${print.start.slice(0, print.kind === 'monthly' ? 7 : print.kind === 'yearly' ? 4 : 10)}`;
+    document.title = `DongDong - ${KIND_LABEL[print.kind]} 플래너 - ${print.start.slice(0, print.kind === 'monthly' ? 7 : print.kind === 'yearly' ? 4 : 10)}`;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && set({ print: null });
     window.addEventListener('keydown', onKey);
     return () => {
@@ -163,7 +163,7 @@ export function PrintRoot() {
 function SheetHead({ kind, title, sub }: { kind: string; title: string; sub?: string }) {
   return (
     <div className="sh-head">
-      <div className="sh-kicker">동동 · {kind}</div>
+      <div className="sh-kicker">DONGDONG · {kind}</div>
       <div className="sh-title">
         {title} {sub ? <small>{sub}</small> : null}
       </div>

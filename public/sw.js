@@ -1,4 +1,4 @@
-// 동동 service worker: cache the app shell so the planner opens offline.
+// DongDong service worker: cache the app shell so the planner opens offline.
 const CACHE = 'dongdong-v1';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon.svg'];
 

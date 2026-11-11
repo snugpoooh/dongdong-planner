@@ -1,4 +1,4 @@
-# 동동 · Digital Planner (dongdong-planner)
+# DongDong · Digital Planner
 
 > 종이의 온기, 디지털의 명료함 — 삶의 방향에서 오늘의 할 일까지.
 

@@ -1,6 +1,6 @@
 {
-  "name": "동동 플래너",
-  "short_name": "동동",
+  "name": "DongDong Planner",
+  "short_name": "DongDong",
   "description": "종이의 온기, 디지털의 명료함 — 삶의 방향에서 오늘의 할 일까지 잇는 1D2P 디지털 플래너",
   "lang": "ko",
   "start_url": "./#/daily",

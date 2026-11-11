@@ -107,7 +107,7 @@ export function Sidebar() {
       <button className="brand" onClick={() => navTo(`daily/${todayKey()}`)} style={{ textAlign: 'left' }}>
         <LogoMark />
         <div>
-          <div className="brand-name">동동</div>
+          <div className="brand-name">DongDong</div>
           <div className="brand-sub">DIGITAL PLANNER</div>
         </div>
       </button>
