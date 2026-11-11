@@ -22,7 +22,7 @@ import { NotesPage } from './pages/Notes';
 import { TrashPage } from './pages/Trash';
 import { SettingsPage } from './pages/Settings';
 import { useRoute } from './lib/router';
-import { useThemeSync, useToday } from './lib/hooks';
+import { useToday } from './lib/hooks';
 import { setSundayLabel, todayKey, weekStart } from './lib/date';
 import { useStore } from './store/store';
 import { useUi } from './store/ui';
@@ -64,7 +64,6 @@ function Page() {
 }
 
 export default function App() {
-  useThemeSync();
   const navOpen = useUi((s) => s.navOpen);
   const setUi = useUi((s) => s.set);
   const toast = useUi((s) => s.toast);

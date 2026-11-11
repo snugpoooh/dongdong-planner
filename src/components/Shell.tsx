@@ -5,6 +5,10 @@ import {
   CalendarRange,
   Calendar,
   Check,
+  CloudOff,
+  RefreshCw,
+  UserRound,
+  TriangleAlert,
   CircleCheck,
   ClipboardCheck,
   Compass,
@@ -26,6 +30,7 @@ import { useStore } from '../store/store';
 import { useUi } from '../store/ui';
 import { go, useRoute, type RouteName } from '../lib/router';
 import { addDays, todayKey, weekStart } from '../lib/date';
+import { retrySync, useAuth } from '../lib/sync';
 import type { ThemeMode } from '../store/types';
 
 interface NavDef {
@@ -154,11 +159,47 @@ export function Sidebar() {
         <button className="foot-link" onClick={() => navTo('settings')}>
           <SettingsIcon /> 설정
         </button>
-        <div className="foot-link" style={{ cursor: 'default' }} title="이 기기의 브라우저에 자동 저장됩니다">
-          <Check /> 이 기기에 저장됨
-        </div>
+        <SyncBadge />
       </div>
     </aside>
+  );
+}
+
+function SyncBadge() {
+  const sync = useAuth((s) => s.sync);
+  const email = useAuth((s) => s.session?.user.email);
+  const setUi = useUi((s) => s.set);
+  const view: Record<string, [ReactNode, string]> = {
+    loading: [<RefreshCw className="spin" />, '불러오는 중…'],
+    saving: [<RefreshCw className="spin" />, '저장 중…'],
+    saved: [<Check />, '동기화 완료'],
+    offline: [<CloudOff />, '오프라인 · 연결되면 저장'],
+    error: [<TriangleAlert />, '동기화 오류 · 다시 시도'],
+    idle: [<Check />, '동기화 대기'],
+  };
+  const [icon, label] = view[sync];
+  return (
+    <>
+      <button
+        className="foot-link"
+        title={email ? `${email} · 계정 설정` : '계정 설정'}
+        onClick={() => {
+          go('settings');
+          setUi({ navOpen: false });
+        }}
+      >
+        <UserRound /> <span className="ellipsis">{email ?? '계정'}</span>
+      </button>
+      {sync === 'error' || sync === 'offline' ? (
+        <button className={`foot-link sync-${sync}`} onClick={retrySync} title="지금 다시 동기화">
+          {icon} {label}
+        </button>
+      ) : (
+        <div className={`foot-link sync-${sync}`} style={{ cursor: 'default' }} title="로그인한 모든 기기에서 같은 플래너가 보입니다">
+          {icon} {label}
+        </div>
+      )}
+    </>
   );
 }
 

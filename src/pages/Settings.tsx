@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ArrowDown, ArrowUp, Download, Plus, Upload, X } from 'lucide-react';
+import { ArrowDown, ArrowUp, Download, LogOut, Plus, Upload, X } from 'lucide-react';
 import { Card, PageHead, Seg } from '../components/ui';
 import { exportData, initialData, useStore } from '../store/store';
 import { useUi } from '../store/ui';
@@ -7,6 +7,8 @@ import { uid } from '../lib/id';
 import { sampleData } from '../lib/sample';
 import { todayKey } from '../lib/date';
 import type { PlannerData, Role } from '../store/types';
+import { flushSync, signOutAndClear, useAuth } from '../lib/sync';
+import { authMessage, supabase } from '../lib/supabase';
 
 function ListEditor({ items, onChange, addLabel, min = 0 }: { items: Role[]; onChange: (v: Role[]) => void; addLabel: string; min?: number }) {
   const [name, setName] = useState('');
@@ -45,6 +47,78 @@ function ListEditor({ items, onChange, addLabel, min = 0 }: { items: Role[]; onC
         </button>
       </div>
     </div>
+  );
+}
+
+function AccountCard() {
+  const email = useAuth((s) => s.session?.user.email);
+  const lastSyncedAt = useAuth((s) => s.lastSyncedAt);
+  const notify = useUi((s) => s.notify);
+  const [pw, setPw] = useState('');
+  const [pw2, setPw2] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  const changePassword = async () => {
+    if (pw.length < 8) return notify('비밀번호는 8자 이상이어야 합니다.');
+    if (pw !== pw2) return notify('비밀번호가 서로 다릅니다.');
+    setBusy(true);
+    const { error } = await supabase!.auth.updateUser({ password: pw });
+    setBusy(false);
+    if (error) return notify(authMessage(error));
+    setPw('');
+    setPw2('');
+    notify('비밀번호를 바꿨습니다.');
+  };
+
+  const logout = async () => {
+    const saved = await flushSync();
+    if (!saved && !window.confirm('아직 계정에 저장되지 않은 변경이 있습니다. 지금 로그아웃하면 이 변경은 사라집니다. 계속할까요?')) return;
+    await signOutAndClear();
+  };
+
+  const deleteAccount = async () => {
+    if (!window.confirm('계정을 삭제할까요? 계정과 모든 플래너 기록이 지워지며 되돌릴 수 없습니다.')) return;
+    const typed = window.prompt('확인을 위해 이메일 주소를 입력하세요.');
+    if (typed?.trim().toLowerCase() !== email?.toLowerCase()) return notify('이메일이 일치하지 않아 취소했습니다.');
+    const { error } = await supabase!.rpc('delete_my_account');
+    if (error) return notify(authMessage(error));
+    await signOutAndClear();
+  };
+
+  return (
+    <Card kicker="Account" title="계정">
+      <div className="settings-row">
+        <span className="small" style={{ fontWeight: 700 }}>
+          로그인 계정
+        </span>
+        <span className="spacer" />
+        <span className="small">{email}</span>
+      </div>
+      {lastSyncedAt && (
+        <div className="tiny muted" style={{ marginBottom: 8 }}>
+          마지막 동기화 {new Date(lastSyncedAt).toLocaleString('ko-KR', { dateStyle: 'medium', timeStyle: 'short' })}
+        </div>
+      )}
+      <div className="divider" />
+      <label className="field-label">비밀번호 변경</label>
+      <div className="row" style={{ flexWrap: 'wrap' }}>
+        <input className="input" style={{ flex: '1 1 140px' }} type="password" autoComplete="new-password" placeholder="새 비밀번호 (8자 이상)" value={pw} onChange={(e) => setPw(e.target.value)} />
+        <input className="input" style={{ flex: '1 1 140px' }} type="password" autoComplete="new-password" placeholder="새 비밀번호 확인" value={pw2} onChange={(e) => setPw2(e.target.value)} />
+        <button className="btn btn-soft" disabled={busy || !pw} onClick={changePassword}>
+          변경
+        </button>
+      </div>
+      <div className="divider" />
+      <div className="row" style={{ flexWrap: 'wrap' }}>
+        <button className="btn btn-outline" onClick={logout}>
+          <LogOut /> 로그아웃
+        </button>
+        <span className="spacer" />
+        <button className="btn btn-danger" onClick={deleteAccount}>
+          계정 삭제
+        </button>
+      </div>
+    </Card>
   );
 }
 
@@ -93,6 +167,7 @@ export function SettingsPage() {
           </Card>
         </div>
         <div className="stack">
+          <AccountCard />
           <Card kicker="Calendar" title="달력과 표시">
             <div className="settings-row">
               <span className="small" style={{ fontWeight: 700 }}>
@@ -151,7 +226,7 @@ export function SettingsPage() {
           </Card>
           <Card kicker="Data" title="저장과 백업">
             <div className="small" style={{ color: 'var(--ink-2)', marginBottom: 12 }}>
-              모든 기록은 이 기기의 브라우저에 자동 저장됩니다. 다른 기기로 옮기거나 보관하려면 백업 파일을 내보내고 가져오세요.
+              기록은 계정에 자동 저장되어 로그인한 모든 기기에서 같은 플래너가 보입니다. 따로 보관하고 싶으면 백업 파일을 내보내 두세요.
             </div>
             <div className="row" style={{ flexWrap: 'wrap' }}>
               <button className="btn btn-primary" onClick={download}>
@@ -178,7 +253,7 @@ export function SettingsPage() {
               <button
                 className="btn btn-danger"
                 onClick={() => {
-                  if (window.confirm('모든 기록을 지울까요? 되돌릴 수 없습니다.')) {
+                  if (window.confirm('모든 기록을 지울까요? 계정에 저장된 기록도 함께 지워지며 되돌릴 수 없습니다.')) {
                     replaceAll({ ...initialData(), settings });
                     notify('모든 기록을 지웠습니다.');
                   }

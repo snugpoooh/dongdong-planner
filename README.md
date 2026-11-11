@@ -38,18 +38,27 @@ npm run preview    # 빌드 결과 확인 (http://localhost:4173)
 | **검색** | ⌘K 전체 검색, 노트 검색(자유 노트·메모·Review·목표 기록) |
 | **PDF** | 일간/주간/월간/연간을 기간 지정해 A4로 출력(미리보기 → 인쇄 → PDF로 저장) |
 | **테마** | 시간대에 따라 자동(기본 7–19시 라이트) · 라이트 · 다크 |
+| **계정** | 이메일 회원가입·로그인, 인증 메일, 비밀번호 재설정, 기기 간 동기화 |
 | **기타** | 휴지통(되살리기/완전 삭제), 2026–2027 한국 공휴일, 반응형(Mac·iPad 2열 / iPhone 1열·햄버거 메뉴), 오프라인 동작 |
 
-## 데이터
+## 계정과 데이터
 
-- 모든 기록은 브라우저 `localStorage`(`dongdong-planner-v1`)에 자동 저장됩니다.
-- **설정 → 백업 내보내기/가져오기**(JSON)로 보관하거나 다른 기기로 옮깁니다. 설정에서 예시 기록을 넣어 둘러볼 수 있습니다.
-- Safari는 오래 열지 않은 웹사이트 저장소를 지울 수 있으니, Dock/홈 화면에 추가해 쓰고 가끔 백업하세요.
+- 사이트를 열면 **로그인 / 회원가입** 화면이 먼저 나옵니다. 이메일과 비밀번호(8자 이상)로 가입하고, 인증 메일의 링크를 누르면 가입이 끝납니다. 비밀번호 재설정 메일도 보낼 수 있습니다.
+- 플래너 기록은 계정(Supabase, `planner_data` 테이블)에 저장되어 **로그인한 모든 기기에서 같은 플래너**가 보입니다. 한 기기에서 고치면 다른 기기에 곧바로 반영되고(Realtime), 두 기기에서 동시에 고친 경우에도 항목별로 합쳐집니다.
+- 각 계정은 자기 기록만 읽고 쓸 수 있습니다(Row Level Security). 스키마는 `supabase/migrations/`에 있습니다.
+- 오프라인에서도 쓸 수 있고, 다시 연결되면 저장됩니다. 사이드바 아래에 동기화 상태가 보입니다.
+- 설정에서 비밀번호 변경, 로그아웃, 계정 삭제, 백업 파일 내보내기/가져오기를 할 수 있습니다.
+
+### 로컬 개발
+
+```bash
+npx vercel env pull .env.local   # VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY 등을 받아옴
+npm run dev
+```
 
 ## 아직 없는 것
 
-- 여러 기기 자동 동기화(원작은 iPad·iPhone 동기화) — 서버/계정이 필요해 v1에서는 백업 파일로 대신합니다.
-- Google 캘린더 연동.
+- Google 캘린더 연동, 소셜 로그인(Google·카카오 등).
 
 ## 구조
 
@@ -58,6 +67,6 @@ src/
   store/      types.ts(데이터 모델) · store.ts(zustand + localStorage) · selectors.ts(일/주/월/연 투영) · ui.ts
   pages/      Daily · Weekly · Monthly · Yearly · Compass · Mos · Projects · Delegation · Review · Notes · Trash · Settings
   components/ Shell · TaskModal · StatusModal · EventModal · Timeline · PlanCards · GoalModal · DayModal · InboxModal · SearchModal · TriageModal · Print
-  lib/        date · holidays · router · hooks · reminders · sample
+  lib/        date · holidays · router · hooks · reminders · sample · supabase · sync · merge
 public/       manifest.webmanifest · sw.js · icons/
 ```
