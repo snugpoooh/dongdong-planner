@@ -4,7 +4,7 @@
 
 공개된 planBAE 소개 글의 기능 구성을 참고해 새로 만든 1D2P 디지털 플래너 웹앱(PWA)입니다. 트랙·역할은 설정에서 바꿀 수 있습니다.
 
-배포 주소: https://snugpoooh.github.io/dongdong-planner/
+배포: Vercel
 
 ## 실행
 
