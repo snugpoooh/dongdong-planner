@@ -6,3 +6,5 @@ dist
 # Reference screenshots and notes about the original app stay local (third-party content)
 docs/reference/
 docs/analysis-notes.md
+.vercel
+.env*
