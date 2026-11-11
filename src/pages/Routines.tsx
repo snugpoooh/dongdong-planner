@@ -92,6 +92,23 @@ export function RoutinesPage() {
         }
       />
 
+      <Card
+        kicker="Tracker"
+        title={`${monthLabel(month)} 기록`}
+        className="mb"
+        actions={
+          <PrevNext onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))}>
+            {month !== today.slice(0, 7) && (
+              <button className="btn btn-soft" onClick={() => setMonth(today.slice(0, 7))}>
+                이번 달
+              </button>
+            )}
+          </PrevNext>
+        }
+        hint="칸을 눌러 했음/안 함을 바꿀 수 있습니다. 지난 날도 고칠 수 있어요."
+      >
+        <MonthTracker routines={all.filter((r) => monthDays(month).some((d) => isActiveOn(r, d)))} month={month} today={today} />
+      </Card>
       <div className="stat-row">
         <div className="stat">
           <div className="stat-k">오늘</div>
@@ -185,23 +202,6 @@ export function RoutinesPage() {
         )}
       </Card>
 
-      <Card
-        kicker="Tracker"
-        title={`${monthLabel(month)} 기록`}
-        className="mt"
-        actions={
-          <PrevNext onPrev={() => setMonth(addMonths(month, -1))} onNext={() => setMonth(addMonths(month, 1))}>
-            {month !== today.slice(0, 7) && (
-              <button className="btn btn-soft" onClick={() => setMonth(today.slice(0, 7))}>
-                이번 달
-              </button>
-            )}
-          </PrevNext>
-        }
-        hint="칸을 눌러 했음/안 함을 바꿀 수 있습니다. 지난 날도 고칠 수 있어요."
-      >
-        <MonthTracker routines={all.filter((r) => monthDays(month).some((d) => isActiveOn(r, d)))} month={month} today={today} />
-      </Card>
     </div>
   );
 }
