@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { ArrowRight, Check, ChevronDown, ChevronRight, ClipboardCheck, Compass, Repeat2, Search } from 'lucide-react';
+import { ArrowRight, Check, ChevronDown, ChevronRight, ClipboardCheck, Compass, Repeat, Repeat2, Search } from 'lucide-react';
 import { Card, PageHead, PrevNext } from '../components/ui';
 import { TaskRow } from '../components/tasks';
 import { reviewOf, useStore } from '../store/store';
@@ -7,6 +7,8 @@ import { useUi } from '../store/ui';
 import { tasksInRange } from '../store/selectors';
 import { addDays, addMonths, daysInMonth, mdDot, monthLabel, todayKey, toKey, weekRangeLabel, weekStart } from '../lib/date';
 import { go } from '../lib/router';
+import { useToday } from '../lib/hooks';
+import { dailyRates, isActiveOn, rateOf, sumRates } from '../lib/routines';
 import type { ReviewType } from '../store/types';
 
 const QUESTIONS: Record<ReviewType, [string, string][]> = {
@@ -91,7 +93,10 @@ export function ReviewPage(props: { type?: string; period?: string }) {
         <LookBack type={type} period={period} />
         <div className="grid-2" style={{ gridTemplateColumns: 'minmax(0, 1.15fr) minmax(0, 1fr)' }}>
           <Reflection key={key} type={type} reviewKey={key} />
-          <ExecutionLog start={start} end={end} label={type === 'week' ? '이번 주' : type === 'month' ? '이번 달' : '올해'} />
+          <div className="stack">
+            <ExecutionLog start={start} end={end} label={type === 'week' ? '이번 주' : type === 'month' ? '이번 달' : '올해'} />
+            <RoutineReview start={start} end={end} />
+          </div>
         </div>
         <Card icon={<Compass />} title="다음 기간 계획">
           <div className="row" style={{ flexWrap: 'wrap' }}>
@@ -297,6 +302,60 @@ function ExecutionLog({ start, end, label }: { start: string; end: string; label
           {openKey === g.key && g.list.map((t) => <TaskRow key={t.id} task={t} withDate compact />)}
         </div>
       ))}
+    </Card>
+  );
+}
+
+function RoutineReview({ start, end }: { start: string; end: string }) {
+  const today = useToday();
+  const routinesAll = useStore((s) => s.routines);
+  const checks = useStore((s) => s.routineChecks);
+  const list = useMemo(() => {
+    const rs = routinesAll.filter((r) => !r.deletedAt);
+    const inPeriod: typeof rs = [];
+    for (const r of rs) {
+      for (let d = start; d <= end && d <= today; d = addDays(d, 1)) {
+        if (isActiveOn(r, d)) {
+          inPeriod.push(r);
+          break;
+        }
+      }
+    }
+    return inPeriod.sort((a, b) => a.order - b.order);
+  }, [routinesAll, start, end, today]);
+  if (!list.length || start > today) return null;
+  const total = sumRates(dailyRates(list, checks, start, end, today));
+  return (
+    <Card
+      icon={<Repeat />}
+      title="루틴 달성"
+      actions={
+        <button className="link-btn" onClick={() => go('routines')}>
+          통계 보기
+        </button>
+      }
+    >
+      <div className="row" style={{ marginBottom: 8 }}>
+        <span className="small" style={{ color: 'var(--ink-2)' }}>
+          전체 {total.done} / {total.total}회
+        </span>
+        <span className="spacer" />
+        <b style={{ fontSize: 20, fontFamily: 'var(--font-serif)' }}>{total.pct == null ? '–' : `${total.pct}%`}</b>
+      </div>
+      {list.map((r) => {
+        const rate = rateOf(r, checks, start, end, today);
+        return (
+          <div key={r.id} className="rt-rate" style={{ padding: '5px 0' }} title={`${rate.done} / ${rate.total}회`}>
+            <span className="small" style={{ width: 110, fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {r.title}
+            </span>
+            <span className="hbar">
+              <span style={{ width: `${rate.pct ?? 0}%` }} />
+            </span>
+            <span className="hval">{rate.pct == null ? '–' : `${rate.pct}%`}</span>
+          </div>
+        );
+      })}
     </Card>
   );
 }

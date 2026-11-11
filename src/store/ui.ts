@@ -14,6 +14,7 @@ interface UiState {
   goalModal: string | null;
   dayModal: string | null;
   carry: { scope: 'month' | 'year'; from: string; to: string } | null;
+  routineModal: { id?: string } | null;
   navOpen: boolean;
   toast: string | null;
   set: (patch: Partial<Omit<UiState, 'set' | 'notify'>>) => void;
@@ -33,6 +34,7 @@ export const useUi = create<UiState>((set) => ({
   goalModal: null,
   dayModal: null,
   carry: null,
+  routineModal: null,
   navOpen: false,
   toast: null,
   set: (patch) => set(patch),
@@ -47,3 +49,4 @@ export const openTask = (defaults?: Partial<Task>, id?: string) => useUi.getStat
 export const openEvent = (defaults?: Partial<PlanEvent>, id?: string, occurrenceDate?: string) =>
   useUi.getState().set({ eventModal: { id, defaults, occurrenceDate } });
 export const openStatus = (id: string) => useUi.getState().set({ statusFor: id });
+export const openRoutine = (id?: string) => useUi.getState().set({ routineModal: { id } });

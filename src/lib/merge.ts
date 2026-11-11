@@ -59,6 +59,8 @@ export function mergePlanner(base: PlannerData, local: PlannerData, remote: Plan
     goals: mergeList(base.goals ?? [], local.goals ?? [], remote.goals ?? []),
     projects: mergeList(base.projects ?? [], local.projects ?? [], remote.projects ?? []),
     inbox: mergeList(base.inbox ?? [], local.inbox ?? [], remote.inbox ?? []),
+    routines: mergeList(base.routines ?? [], local.routines ?? [], remote.routines ?? []),
+    routineChecks: mergeRecord(base.routineChecks ?? {}, local.routineChecks ?? {}, remote.routineChecks ?? {}),
     directions: mergeRecord(base.directions ?? {}, local.directions ?? {}, remote.directions ?? {}),
     notes: mergeRecord(base.notes ?? {}, local.notes ?? {}, remote.notes ?? {}),
     compass: mergeRecord(base.compass ?? {}, local.compass ?? {}, remote.compass ?? {}),
@@ -75,6 +77,7 @@ export function isEmptyPlanner(d: PlannerData): boolean {
     !d.goals?.length &&
     !d.projects?.length &&
     !d.inbox?.length &&
+    !d.routines?.length &&
     !Object.values(d.notes ?? {}).some((v) => v?.trim()) &&
     !Object.keys(d.compass ?? {}).length &&
     !Object.keys(d.reviews ?? {}).length &&

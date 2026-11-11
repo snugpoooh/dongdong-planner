@@ -1,4 +1,4 @@
-import { addDays, monthOf, todayKey, weekStart, yearOf } from './date';
+import { addDays, dow, monthOf, todayKey, weekStart, yearOf } from './date';
 import { initialData, newEvent, newGoal, newTask, DEFAULT_SETTINGS } from '../store/store';
 import { uid } from './id';
 import type { PlannerData } from '../store/types';
@@ -92,6 +92,27 @@ export function sampleData(): PlannerData {
       versions: [],
     },
   };
+  const r1 = { id: uid(), title: '아침 스트레칭', days: [0, 1, 2, 3, 4, 5, 6], time: '06:30', duration: 15, track: P, memo: '', startDate: addDays(today, -27), endDate: null, order: 1, createdAt: new Date().toISOString(), deletedAt: null };
+  const r2 = { id: uid(), title: '독서 30분', days: [0, 1, 2, 3, 4, 5, 6], time: '21:30', duration: 30, track: P, memo: '', startDate: addDays(today, -27), endDate: null, order: 2, createdAt: new Date().toISOString(), deletedAt: null };
+  const r3 = { id: uid(), title: '감사 일기', days: [0, 1, 2, 3, 4, 5, 6], time: null, duration: 10, track: P, memo: '', startDate: addDays(today, -27), endDate: null, order: 3, createdAt: new Date().toISOString(), deletedAt: null };
+  const r4 = { id: uid(), title: '업무 계획 점검', days: [1, 2, 3, 4, 5], time: '09:00', duration: 15, track: W, memo: '', startDate: addDays(today, -27), endDate: null, order: 4, createdAt: new Date().toISOString(), deletedAt: null };
+  d.routines = [r1, r2, r3, r4];
+  d.routineChecks = {};
+  // A believable history: most days done, a few misses, Sundays rest for the work routine.
+  let rngSeed = 7;
+  const rnd = () => ((rngSeed = (rngSeed * 9301 + 49297) % 233280) / 233280);
+  for (let i = 27; i >= 1; i--) {
+    const day = addDays(today, -i);
+    const w = dow(day);
+    for (const [r, p] of [[r1, 0.82], [r2, 0.7], [r3, 0.9], [r4, 0.85]] as const) {
+      if (!r.days.includes(w)) continue;
+      const x = rnd();
+      if (x < p) d.routineChecks[`${day}|${r.id}`] = 'done';
+      else if (x > 0.96) d.routineChecks[`${day}|${r.id}`] = 'skipped';
+    }
+  }
+  d.routineChecks[`${today}|${r1.id}`] = 'done';
+
   d.inbox = [
     { id: uid(), text: '사진 정리 앱 찾아보기', kind: 'idea', track: P, state: 'inbox', createdAt: new Date().toISOString(), resolvedAt: null, resolvedAs: null, deletedAt: null },
   ];

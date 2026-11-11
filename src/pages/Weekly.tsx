@@ -1,10 +1,11 @@
 import { useMemo } from 'react';
 import { Clock, Plus } from 'lucide-react';
 import { Card, PageHead, PrevNext } from '../components/ui';
-import { HOUR_PX } from '../components/Timeline';
+import { Block, HOUR_PX, placeDay } from '../components/Timeline';
+import { markOf, routinesOn } from '../lib/routines';
 import { useStore } from '../store/store';
 import { openEvent } from '../store/ui';
-import { layoutDay, occurrencesOn, timeRange } from '../store/selectors';
+import { occurrencesOn } from '../store/selectors';
 import { addDays, dow, dowLong, hhmm, mdDot, weekDays, weekRangeLabel, weekStart } from '../lib/date';
 import { useNowMinutes, useToday } from '../lib/hooks';
 import { go } from '../lib/router';
@@ -15,6 +16,12 @@ export function WeeklyPage({ week }: { week: string }) {
   const events = useStore((s) => s.events);
   const days = weekDays(week);
   const occ = useMemo(() => days.map((d) => occurrencesOn(events, d)), [events, week]); // eslint-disable-line react-hooks/exhaustive-deps
+  const routinesAll = useStore((s) => s.routines);
+  const checks = useStore((s) => s.routineChecks);
+  const routinesByDay = useMemo(
+    () => days.map((d) => routinesOn(routinesAll, d).filter((r) => r.time).map((r) => ({ r, mark: markOf(checks, d, r.id) }))),
+    [routinesAll, checks, week], // eslint-disable-line react-hooks/exhaustive-deps
+  );
   const hasAllDay = occ.some((o) => o.some((x) => x.startMin == null));
   const now = useNowMinutes();
   const todayIdx = days.indexOf(today);
@@ -102,27 +109,9 @@ export function WeeklyPage({ week }: { week: string }) {
                     onClick={() => openEvent({ startDate: d, startTime: hhmm(h * 60), endTime: hhmm(Math.min(h * 60 + 60, 1439)) })}
                   />
                 ))}
-                {layoutDay(occ[i]).map(({ o, start, end, col, cols }) => {
-                  const w = 100 / cols;
-                  return (
-                    <button
-                      key={o.event.id}
-                      className={`tl-event ${o.endMin == null ? 'open-end' : ''} ${end - start < 58 ? 'one-line' : ''}`}
-                      style={{
-                        top: (start / 60) * HOUR_PX,
-                        height: Math.max(((end - start) / 60) * HOUR_PX - 2, 18),
-                        left: `calc(${col * w}% + 2px)`,
-                        width: `calc(${w}% - 4px)`,
-                        right: 'auto',
-                      }}
-                      onClick={() => openEvent(undefined, o.event.id, d)}
-                      title={`${timeRange(o)} ${o.event.title}`}
-                    >
-                      <div className="t">{timeRange(o)}</div>
-                      <div className="n">{o.event.title}</div>
-                    </button>
-                  );
-                })}
+                {placeDay(occ[i], routinesByDay[i]).map((p) => (
+                  <Block key={p.item.kind === 'event' ? `e-${p.item.o.event.id}` : `r-${p.item.tr.r.id}`} {...p} date={d} inset={2} />
+                ))}
               </div>
             ))}
             {todayIdx >= 0 && (

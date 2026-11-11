@@ -130,13 +130,12 @@ export function eventsInRange(events: PlanEvent[], start: DateKey, end: DateKey)
 
 export const REPEAT_LABEL: Record<string, string> = { none: '', daily: '매일', weekly: '매주', monthly: '매월', yearly: '매년' };
 
-/** Lay out overlapping timed occurrences in columns. */
-export function layoutDay(occ: Occurrence[]) {
-  const timed = occ
-    .filter((o) => o.startMin != null)
-    .map((o) => ({ o, start: o.startMin!, end: Math.max(o.endMin ?? o.startMin! + 45, o.startMin! + 20) }))
+/** Lay out overlapping timed items in side-by-side columns. */
+export function layoutItems<T>(items: { item: T; start: number; end: number }[]) {
+  const sorted = items
+    .map((x) => ({ ...x, end: Math.max(x.end, x.start + 20) }))
     .sort((a, b) => a.start - b.start || b.end - a.end);
-  const placed: { o: Occurrence; start: number; end: number; col: number; cols: number }[] = [];
+  const placed: { item: T; start: number; end: number; col: number; cols: number }[] = [];
   let cluster: typeof placed = [];
   let clusterEnd = -1;
   const flush = () => {
@@ -144,21 +143,27 @@ export function layoutDay(occ: Occurrence[]) {
     cluster.forEach((c) => (c.cols = n));
     cluster = [];
   };
-  for (const item of timed) {
-    if (item.start >= clusterEnd) {
+  for (const it of sorted) {
+    if (it.start >= clusterEnd) {
       flush();
       clusterEnd = -1;
     }
-    const used = new Set(cluster.filter((c) => c.end > item.start).map((c) => c.col));
+    const used = new Set(cluster.filter((c) => c.end > it.start).map((c) => c.col));
     let col = 0;
     while (used.has(col)) col++;
-    const p = { ...item, col, cols: 1 };
+    const p = { ...it, col, cols: 1 };
     cluster.push(p);
     placed.push(p);
-    clusterEnd = Math.max(clusterEnd, item.end);
+    clusterEnd = Math.max(clusterEnd, it.end);
   }
   flush();
   return placed;
+}
+
+export function layoutDay(occ: Occurrence[]) {
+  return layoutItems(
+    occ.filter((o) => o.startMin != null).map((o) => ({ item: o, start: o.startMin!, end: o.endMin ?? o.startMin! + 45 })),
+  ).map((p) => ({ o: p.item, start: p.start, end: p.end, col: p.col, cols: p.cols }));
 }
 
 export function timeRange(o: Occurrence): string {

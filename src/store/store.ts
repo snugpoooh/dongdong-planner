@@ -10,11 +10,14 @@ import type {
   PlannerData,
   Project,
   Review,
+  Routine,
+  RoutineMark,
   Settings,
   Task,
   TaskStatus,
 } from './types';
 import { uid } from '../lib/id';
+import { toKey } from '../lib/date';
 
 const nowIso = () => new Date().toISOString();
 
@@ -64,6 +67,8 @@ export function initialData(): PlannerData {
     reviews: {},
     mos: {},
     inbox: [],
+    routines: [],
+    routineChecks: {},
     settings: { ...DEFAULT_SETTINGS },
   };
 }
@@ -133,7 +138,7 @@ export function newGoal(partial: Partial<Goal> & Pick<Goal, 'scope' | 'period'>)
   };
 }
 
-export type TrashKind = 'task' | 'event' | 'goal' | 'project' | 'inbox';
+export type TrashKind = 'task' | 'event' | 'goal' | 'project' | 'inbox' | 'routine';
 
 export interface StatusOptions {
   deferTo?: string | null;
@@ -178,6 +183,12 @@ interface Actions {
   updateInbox: (id: string, patch: Partial<InboxItem>) => void;
   resolveInbox: (id: string, as: string) => void;
   deleteInbox: (id: string) => void;
+  // routines
+  addRoutine: (r: Partial<Routine>) => string;
+  updateRoutine: (id: string, patch: Partial<Routine>) => void;
+  deleteRoutine: (id: string) => void;
+  moveRoutine: (id: string, dir: -1 | 1) => void;
+  setRoutineMark: (date: string, id: string, mark: RoutineMark | null) => void;
   // settings
   updateSettings: (patch: Partial<Settings>) => void;
   // trash
@@ -190,12 +201,13 @@ interface Actions {
 
 export type Store = PlannerData & Actions;
 
-const COLLECTION: Record<TrashKind, 'tasks' | 'events' | 'goals' | 'projects' | 'inbox'> = {
+const COLLECTION: Record<TrashKind, 'tasks' | 'events' | 'goals' | 'projects' | 'inbox' | 'routines'> = {
   task: 'tasks',
   event: 'events',
   goal: 'goals',
   project: 'projects',
   inbox: 'inbox',
+  routine: 'routines',
 };
 
 export const useStore = create<Store>()(
@@ -414,6 +426,46 @@ export const useStore = create<Store>()(
       deleteInbox: (id) =>
         set((s) => ({ inbox: s.inbox.map((i) => (i.id === id ? { ...i, deletedAt: nowIso() } : i)) })),
 
+      addRoutine: (r) => {
+        const routine: Routine = {
+          id: uid(),
+          title: '',
+          days: [0, 1, 2, 3, 4, 5, 6],
+          time: null,
+          duration: 30,
+          track: null,
+          memo: '',
+          startDate: toKey(new Date()),
+          endDate: null,
+          order: Date.now(),
+          createdAt: nowIso(),
+          deletedAt: null,
+          ...r,
+        };
+        set((s) => ({ routines: [...s.routines, routine] }));
+        return routine.id;
+      },
+      updateRoutine: (id, patch) => set((s) => ({ routines: s.routines.map((r) => (r.id === id ? { ...r, ...patch } : r)) })),
+      deleteRoutine: (id) => set((s) => ({ routines: s.routines.map((r) => (r.id === id ? { ...r, deletedAt: nowIso() } : r)) })),
+      moveRoutine: (id, dir) =>
+        set((s) => {
+          const list = s.routines.filter((r) => !r.deletedAt).sort((a, b) => a.order - b.order);
+          const i = list.findIndex((r) => r.id === id);
+          const j = i + dir;
+          if (i < 0 || j < 0 || j >= list.length) return {};
+          const a = list[i];
+          const b = list[j];
+          return { routines: s.routines.map((r) => (r.id === a.id ? { ...r, order: b.order } : r.id === b.id ? { ...r, order: a.order } : r)) };
+        }),
+      setRoutineMark: (date, id, mark) =>
+        set((s) => {
+          const key = `${date}|${id}`;
+          const next = { ...s.routineChecks };
+          if (mark) next[key] = mark;
+          else delete next[key];
+          return { routineChecks: next };
+        }),
+
       updateSettings: (patch) => set((s) => ({ settings: { ...s.settings, ...patch } })),
 
       restore: (kind, id) =>
@@ -435,6 +487,7 @@ export const useStore = create<Store>()(
           goals: s.goals.filter((x) => !x.deletedAt),
           projects: s.projects.filter((x) => !x.deletedAt),
           inbox: s.inbox.filter((x) => !x.deletedAt),
+          routines: s.routines.filter((x) => !x.deletedAt),
         })),
 
       replaceAll: (data) => set(() => ({ ...initialData(), ...data, settings: { ...DEFAULT_SETTINGS, ...data.settings } })),
@@ -448,10 +501,7 @@ export const useStore = create<Store>()(
         setItem: (name, value) => localStorage.setItem(name, value),
         removeItem: (name) => localStorage.removeItem(name),
       })),
-      partialize: (s) => {
-        const { tasks, events, goals, projects, directions, notes, compass, reviews, mos, inbox, settings } = s;
-        return { tasks, events, goals, projects, directions, notes, compass, reviews, mos, inbox, settings };
-      },
+      partialize: (s) => dataOf(s),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<PlannerData>;
         return { ...current, ...p, settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) } };
@@ -460,11 +510,20 @@ export const useStore = create<Store>()(
   ),
 );
 
-export function exportData(): PlannerData {
-  const s = useStore.getState();
-  const { tasks, events, goals, projects, directions, notes, compass, reviews, mos, inbox, settings } = s;
-  return { tasks, events, goals, projects, directions, notes, compass, reviews, mos, inbox, settings };
+/**
+ * Every data section in the store (anything that isn't an action). Sections this version doesn't
+ * know about (written by a newer version on another device) are carried along instead of dropped.
+ */
+export function dataOf(s: Store): PlannerData {
+  return Object.fromEntries(Object.entries(s).filter(([, v]) => typeof v !== 'function')) as unknown as PlannerData;
 }
+
+export function exportData(): PlannerData {
+  return dataOf(useStore.getState());
+}
+
+/** Sections every saved copy of this version must contain. */
+export const DATA_SECTIONS = Object.keys(initialData()) as (keyof PlannerData)[];
 
 export function emptyMosTrackFor(): MosTrack {
   return emptyMosTrack();

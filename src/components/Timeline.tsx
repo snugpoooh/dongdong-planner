@@ -1,25 +1,90 @@
 import { useRef } from 'react';
-import { hhmm } from '../lib/date';
+import { Check, Repeat } from 'lucide-react';
+import { hhmm, minutesOf } from '../lib/date';
 import { useNowMinutes } from '../lib/hooks';
-import { layoutDay, timeRange } from '../store/selectors';
+import { layoutItems, timeRange } from '../store/selectors';
+import { useStore } from '../store/store';
 import { openEvent } from '../store/ui';
-import type { Occurrence } from '../store/types';
+import type { Occurrence, Routine, RoutineMark } from '../store/types';
 
 export const HOUR_PX = 33;
+
+export interface TimedRoutine {
+  r: Routine;
+  mark: RoutineMark | null;
+}
+
+type Item = { kind: 'event'; o: Occurrence } | { kind: 'routine'; tr: TimedRoutine };
+
+/** Events and timed routines for one day, laid out together. */
+export function placeDay(occ: Occurrence[], routines: TimedRoutine[] = []) {
+  const items: { item: Item; start: number; end: number }[] = [
+    ...occ.filter((o) => o.startMin != null).map((o) => ({ item: { kind: 'event' as const, o }, start: o.startMin!, end: o.endMin ?? o.startMin! + 45 })),
+    ...routines
+      .filter((tr) => tr.r.time)
+      .map((tr) => {
+        const s = minutesOf(tr.r.time)!;
+        return { item: { kind: 'routine' as const, tr }, start: s, end: Math.min(s + tr.r.duration, 24 * 60) };
+      }),
+  ];
+  return layoutItems(items);
+}
+
+/** One positioned block (event or routine) inside a day column. */
+export function Block({ item, start, end, col, cols, date, inset = 1 }: { item: Item; start: number; end: number; col: number; cols: number; date: string; inset?: number }) {
+  const setMark = useStore((s) => s.setRoutineMark);
+  const top = (start / 60) * HOUR_PX;
+  const height = Math.max(((end - start) / 60) * HOUR_PX - 2, 18);
+  const w = 100 / cols;
+  const style = { top, height, left: `calc(${col * w}% + ${inset}px)`, width: `calc(${w}% - ${inset * 2 + 1}px)`, right: 'auto' as const };
+  const oneLine = end - start < 58 ? 'one-line' : '';
+  if (item.kind === 'event') {
+    const o = item.o;
+    return (
+      <button
+        className={`tl-event ${o.endMin == null ? 'open-end' : ''} ${oneLine}`}
+        style={style}
+        onClick={() => openEvent(undefined, o.event.id, date)}
+        title={`${timeRange(o)} ${o.event.title}`}
+      >
+        <div className="t">{timeRange(o)}</div>
+        <div className="n">{o.event.title}</div>
+      </button>
+    );
+  }
+  const { r, mark } = item.tr;
+  const done = mark === 'done';
+  return (
+    <button
+      className={`tl-event tl-routine ${oneLine} ${done ? 'done' : ''} ${mark === 'skipped' ? 'skipped' : ''}`}
+      style={style}
+      aria-pressed={done}
+      onClick={() => setMark(date, r.id, done ? null : 'done')}
+      title={`루틴 · ${r.time} ${r.title} — 눌러서 ${done ? '완료 취소' : '완료'}`}
+    >
+      <div className="t">
+        {done ? <Check className="ri" /> : <Repeat className="ri" />} {r.time}
+      </div>
+      <div className="n">{r.title}</div>
+    </button>
+  );
+}
 
 export function DayTimeline({
   date,
   occurrences,
+  routines = [],
   isToday,
   scrollRef,
 }: {
   date: string;
   occurrences: Occurrence[];
+  routines?: TimedRoutine[];
   isToday: boolean;
   scrollRef?: React.RefObject<HTMLDivElement>;
 }) {
   const now = useNowMinutes();
-  const placed = layoutDay(occurrences);
+  const placed = placeDay(occurrences, routines);
   const allDay = occurrences.filter((o) => o.startMin == null);
   const localRef = useRef<HTMLDivElement>(null);
   const ref = scrollRef ?? localRef;
@@ -43,9 +108,7 @@ export function DayTimeline({
               <button
                 className="tl-slot"
                 aria-label={`${h}시에 일정 추가`}
-                onClick={() =>
-                  openEvent({ startDate: date, startTime: hhmm(h * 60), endTime: hhmm(Math.min(h * 60 + 60, 24 * 60 - 1)) })
-                }
+                onClick={() => openEvent({ startDate: date, startTime: hhmm(h * 60), endTime: hhmm(Math.min(h * 60 + 60, 24 * 60 - 1)) })}
               />
             ) : (
               <div className="tl-slot" style={{ cursor: 'default' }} />
@@ -53,23 +116,9 @@ export function DayTimeline({
           </div>
         ))}
         <div className="tl-events">
-          {placed.map(({ o, start, end, col, cols }) => {
-            const top = (start / 60) * HOUR_PX;
-            const height = Math.max(((end - start) / 60) * HOUR_PX - 2, 18);
-            const w = 100 / cols;
-            return (
-              <button
-                key={`${o.event.id}-${o.date}`}
-                className={`tl-event ${o.endMin == null ? 'open-end' : ''} ${end - start < 58 ? 'one-line' : ''}`}
-                style={{ top, height, left: `calc(${col * w}% + 1px)`, width: `calc(${w}% - 3px)` }}
-                onClick={() => openEvent(undefined, o.event.id, date)}
-                title={`${timeRange(o)} ${o.event.title}`}
-              >
-                <div className="t">{timeRange(o)}</div>
-                <div className="n">{o.event.title}</div>
-              </button>
-            );
-          })}
+          {placed.map((p) => (
+            <Block key={p.item.kind === 'event' ? `e-${p.item.o.event.id}` : `r-${p.item.tr.r.id}`} {...p} date={date} />
+          ))}
         </div>
         {isToday && (
           <div className="tl-now" style={{ top: 8 + (now / 60) * HOUR_PX }} data-now>

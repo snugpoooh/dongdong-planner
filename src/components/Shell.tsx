@@ -7,6 +7,7 @@ import {
   Check,
   CloudOff,
   RefreshCw,
+  Repeat,
   UserRound,
   TriangleAlert,
   CircleCheck,
@@ -55,6 +56,7 @@ const SECTIONS: { title: string; items: NavDef[] }[] = [
       { route: 'weekly', label: 'Weekly', icon: <CalendarRange />, path: () => `weekly/${weekStart(todayKey())}` },
       { route: 'monthly', label: 'Monthly', icon: <Calendar />, path: () => `monthly/${todayKey().slice(0, 7)}` },
       { route: 'yearly', label: 'Yearly', icon: <CalendarDays />, path: () => `yearly/${todayKey().slice(0, 4)}` },
+      { route: 'routines', label: '루틴', icon: <Repeat />, path: () => 'routines' },
     ],
   },
   {
@@ -75,6 +77,7 @@ export const ROUTE_LABEL: Record<RouteName, [string, string]> = {
   weekly: ['Planner', 'Weekly'],
   monthly: ['Planner', 'Monthly'],
   yearly: ['Planner', 'Yearly'],
+  routines: ['Planner', '루틴'],
   projects: ['Workspace', '프로젝트'],
   delegation: ['Workspace', '위임한 일'],
   review: ['Workspace', 'Review'],
@@ -95,7 +98,8 @@ export function Sidebar() {
       s.events.filter((x) => x.deletedAt).length +
       s.goals.filter((x) => x.deletedAt).length +
       s.projects.filter((x) => x.deletedAt).length +
-      s.inbox.filter((x) => x.deletedAt).length,
+      s.inbox.filter((x) => x.deletedAt).length +
+      s.routines.filter((x) => x.deletedAt).length,
   );
   const delegatedCount = useMemo(() => tasks.filter((t) => !t.deletedAt && t.status === 'delegated').length, [tasks]);
   const navTo = (p: string) => {

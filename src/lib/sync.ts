@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { RealtimeChannel, Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
-import { exportData, initialData, STORAGE_KEY, useStore } from '../store/store';
+import { DATA_SECTIONS, exportData, initialData, STORAGE_KEY, useStore } from '../store/store';
 import { isEmptyPlanner, mergePlanner } from './merge';
 import type { PlannerData } from '../store/types';
 
@@ -83,7 +83,7 @@ function saveMeta() {
   }
 }
 
-const SLICES = ['tasks', 'events', 'goals', 'projects', 'directions', 'notes', 'compass', 'reviews', 'mos', 'inbox', 'settings'] as const;
+const SLICES = ['tasks', 'events', 'goals', 'projects', 'directions', 'notes', 'compass', 'reviews', 'mos', 'inbox', 'routines', 'routineChecks', 'settings'] as const;
 
 function schedulePush(delay = 1200) {
   if (!eng) return;
@@ -194,6 +194,11 @@ export async function startSync(uid: string) {
     // Records made on this device before accounts existed: fold them into the account.
     meta = { rev: 0, base: initialData(), pending: true };
   }
+  if (meta?.base && !cacheIsComplete()) {
+    // The device copy was last written by an older version (it lacks sections this version has):
+    // don't trust it; take the account copy instead.
+    meta = { rev: 0, base: null, pending: false };
+  }
   try {
     localStorage.setItem(OWNER_KEY, uid);
   } catch {
@@ -232,6 +237,33 @@ export async function startSync(uid: string) {
   }, 60000);
 
   await pull();
+  void verifyAccount(e);
+}
+
+/**
+ * A stored session can outlive its account (deleted elsewhere, revoked). Ask the server once;
+ * if it no longer knows this user, sign out instead of showing a stale planner with sync errors.
+ * Network failures are ignored so offline use keeps working.
+ */
+async function verifyAccount(e: Engine) {
+  if (!supabase) return;
+  const { error } = await supabase.auth.getUser();
+  if (!error || eng !== e) return;
+  const status = (error as { status?: number }).status;
+  if (status === 401 || status === 403 || /not exist|not found|invalid (jwt|token)|session/i.test(error.message)) {
+    await signOutAndClear();
+  }
+}
+
+function cacheIsComplete(): boolean {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const state = (JSON.parse(raw) as { state?: Record<string, unknown> }).state ?? {};
+    return DATA_SECTIONS.every((k) => k in state);
+  } catch {
+    return false;
+  }
 }
 
 export function stopSync() {
@@ -266,6 +298,7 @@ export async function signOutAndClear() {
   apply(initialData());
   try {
     localStorage.removeItem(STORAGE_KEY);
+    localStorage.removeItem('folio-planner-v1'); // pre-rename cache
     localStorage.removeItem(OWNER_KEY);
     if (uid) localStorage.removeItem(metaKey(uid));
   } catch {

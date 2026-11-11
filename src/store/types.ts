@@ -181,6 +181,25 @@ export interface Settings {
   dismissedReminders: string[];
 }
 
+/** A habit repeated on chosen weekdays; it shows up in each matching day automatically. */
+export interface Routine {
+  id: string;
+  title: string;
+  days: number[]; // 0 = 일 … 6 = 토
+  time: string | null; // HH:MM, places it on the 24h timetable
+  duration: number; // minutes
+  track: string | null;
+  memo: string;
+  startDate: DateKey; // counts from this day
+  endDate: DateKey | null; // 중단한 날 (inclusive); null = 진행 중
+  order: number;
+  createdAt: string;
+  deletedAt: string | null;
+}
+
+/** 'done' = 했음, 'skipped' = 건너뜀 (쉬는 날, 달성률에서 제외). No entry = 안 함. */
+export type RoutineMark = 'done' | 'skipped';
+
 export interface PlannerData {
   tasks: Task[];
   events: PlanEvent[];
@@ -192,5 +211,7 @@ export interface PlannerData {
   reviews: Record<string, Review>; // 'week:2026-11-09' | 'month:2026-11' | 'year:2026'
   mos: Record<string, MosTrack>; // track id → M/O/S
   inbox: InboxItem[];
+  routines: Routine[];
+  routineChecks: Record<string, RoutineMark>; // `${date}|${routineId}`
   settings: Settings;
 }

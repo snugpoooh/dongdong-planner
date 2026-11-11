@@ -5,6 +5,7 @@ export type RouteName =
   | 'weekly'
   | 'monthly'
   | 'yearly'
+  | 'routines'
   | 'compass'
   | 'mos'
   | 'projects'
@@ -25,6 +26,7 @@ const NAMES: RouteName[] = [
   'weekly',
   'monthly',
   'yearly',
+  'routines',
   'compass',
   'mos',
   'projects',

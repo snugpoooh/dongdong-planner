@@ -5,7 +5,7 @@ import { useStore, type TrashKind } from '../store/store';
 import { useUi } from '../store/ui';
 import { mdDot, toKey } from '../lib/date';
 
-const KIND_LABEL: Record<TrashKind, string> = { task: '업무', event: '일정', goal: '목표', project: '프로젝트', inbox: 'Inbox' };
+const KIND_LABEL: Record<TrashKind, string> = { task: '업무', event: '일정', goal: '목표', project: '프로젝트', inbox: 'Inbox', routine: '루틴' };
 
 export function TrashPage() {
   const s = useStore();
@@ -17,8 +17,9 @@ export function TrashPage() {
     s.goals.forEach((x) => x.deletedAt && out.push({ kind: 'goal', id: x.id, title: x.title, deletedAt: x.deletedAt }));
     s.projects.forEach((x) => x.deletedAt && out.push({ kind: 'project', id: x.id, title: x.title, deletedAt: x.deletedAt }));
     s.inbox.forEach((x) => x.deletedAt && out.push({ kind: 'inbox', id: x.id, title: x.text.split('\n')[0], deletedAt: x.deletedAt }));
+    s.routines.forEach((x) => x.deletedAt && out.push({ kind: 'routine', id: x.id, title: x.title, deletedAt: x.deletedAt }));
     return out.sort((a, b) => (a.deletedAt < b.deletedAt ? 1 : -1));
-  }, [s.tasks, s.events, s.goals, s.projects, s.inbox]);
+  }, [s.tasks, s.events, s.goals, s.projects, s.inbox, s.routines]);
 
   return (
     <div className="page narrow">

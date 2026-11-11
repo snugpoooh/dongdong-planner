@@ -23,6 +23,7 @@ import {
   weekStart,
 } from '../lib/date';
 import { holidayName } from '../lib/holidays';
+import { markOf, routinesOn } from '../lib/routines';
 import type { PlannerData, Task } from '../store/types';
 
 const KIND_LABEL: Record<PrintKind, string> = { daily: '일간', weekly: '주간', monthly: '월간', yearly: '연간' };
@@ -210,6 +211,21 @@ function DailySheet({ date, data }: { date: string; data: PlannerData }) {
             ) : null,
           )}
           {!tasks.length && <div className="sh-lines" style={{ height: 180 }} />}
+          {routinesOn(data.routines ?? [], date).length > 0 && (
+            <div className="sh-group" style={{ marginTop: 10 }}>
+              <div className="sh-sec">루틴</div>
+              {routinesOn(data.routines ?? [], date).map((r) => {
+                const m = markOf(data.routineChecks ?? {}, date, r.id);
+                return (
+                  <div key={r.id} className={`sh-task ${m === 'done' ? 's-done' : ''}`}>
+                    <span className="g">{m === 'done' ? '✓' : m === 'skipped' ? '–' : '○'}</span>
+                    <span className="n">{r.title}</span>
+                    {r.time ? <span className="m">{r.time}</span> : null}
+                  </div>
+                );
+              })}
+            </div>
+          )}
           <div className="sh-sec" style={{ marginTop: 14 }}>
             자유 노트
           </div>

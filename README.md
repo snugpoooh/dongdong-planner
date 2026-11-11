@@ -27,6 +27,7 @@ npm run preview    # 빌드 결과 확인 (http://localhost:4173)
 | **Weekly** | 월–주일 7열 24시간 시간표, 오늘 열 강조, 토/주일 색, 빈 칸 클릭 → 일정, 날짜 클릭 → Daily |
 | **Monthly** | 달력/목록 전환, 칸에 일정과 업무 수, 날짜 숫자 → Daily, 칸·+ → 그날 계획 확인과 추가. 이달의 방향, 중요한 목표(결과 기록), 주요업무, 연결된 일정 |
 | **Yearly** | 한눈에 보는 한 해(지나온 날/오늘/남은 날/공휴일, 모바일은 점 그리드), 올해의 방향, 연간 목표(진행 단계 · 변화 기록), 주요업무, 연결된 일정 |
+| **루틴** | 요일·시간을 정한 반복 습관이 Daily의 ‘오늘의 루틴’과 Daily·Weekly 24시간 시간표에 자동으로 들어감. 체크/건너뛰기, 연속 일수. 루틴 페이지: 오늘·이번 주·기간 달성률, 날짜별·요일별 달성률 차트, 루틴별 달성률·현재/최장 연속·누적, 월간 기록표. Review에 기간별 루틴 달성 |
 | **이어가기** | 끝내지 못한 목표는 자동으로 넘어가지 않음. ‘지난달/지난해 목표 이어가기’에서 직접 골라 이어감 |
 | **연동** | 업무 하나가 일/주/월/연 화면과 프로젝트·목표에 함께 보임 — 옮겨 적기 없음 |
 | **Weekly Compass** | 자기계발(신체·사회/감정·정신·영적) + 역할별 Big Rock, 지난주 복사, 이번 주 Daily 열기, 주간 업무, 일간 배정 업무, 연결된 일정 |
@@ -45,7 +46,7 @@ npm run preview    # 빌드 결과 확인 (http://localhost:4173)
 
 - 사이트를 열면 **로그인 / 회원가입** 화면이 먼저 나옵니다. 이메일과 비밀번호(8자 이상)로 가입하고, 인증 메일의 링크를 누르면 가입이 끝납니다. 비밀번호 재설정 메일도 보낼 수 있습니다.
 - 플래너 기록은 계정(Supabase, `planner_data` 테이블)에 저장되어 **로그인한 모든 기기에서 같은 플래너**가 보입니다. 한 기기에서 고치면 다른 기기에 곧바로 반영되고(Realtime), 두 기기에서 동시에 고친 경우에도 항목별로 합쳐집니다.
-- 각 계정은 자기 기록만 읽고 쓸 수 있습니다(Row Level Security). 스키마는 `supabase/migrations/`에 있습니다.
+- 각 계정은 자기 기록만 읽고 쓸 수 있습니다(Row Level Security). 예전 버전 앱이 저장해도 모르는 항목(예: 루틴)은 지워지지 않도록 서버에서 보존합니다. 스키마는 `supabase/migrations/`에 있습니다.
 - 오프라인에서도 쓸 수 있고, 다시 연결되면 저장됩니다. 사이드바 아래에 동기화 상태가 보입니다.
 - 설정에서 비밀번호 변경, 로그아웃, 계정 삭제, 백업 파일 내보내기/가져오기를 할 수 있습니다.
 
@@ -65,8 +66,8 @@ npm run dev
 ```
 src/
   store/      types.ts(데이터 모델) · store.ts(zustand + localStorage) · selectors.ts(일/주/월/연 투영) · ui.ts
-  pages/      Daily · Weekly · Monthly · Yearly · Compass · Mos · Projects · Delegation · Review · Notes · Trash · Settings
+  pages/      Daily · Weekly · Monthly · Yearly · Routines · Compass · Mos · Projects · Delegation · Review · Notes · Trash · Settings
   components/ Shell · TaskModal · StatusModal · EventModal · Timeline · PlanCards · GoalModal · DayModal · InboxModal · SearchModal · TriageModal · Print
-  lib/        date · holidays · router · hooks · reminders · sample · supabase · sync · merge
+  lib/        date · holidays · router · hooks · reminders · sample · supabase · sync · merge · routines
 public/       manifest.webmanifest · sw.js · icons/
 ```

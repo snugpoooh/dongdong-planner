@@ -8,6 +8,8 @@ import { SearchModal } from './components/SearchModal';
 import { TriageModal } from './components/TriageModal';
 import { GoalModal, CarryModal } from './components/GoalModal';
 import { DayModal } from './components/DayModal';
+import { RoutineModal } from './components/RoutineModal';
+import { RoutinesPage } from './pages/Routines';
 import { PrintModal, PrintRoot } from './components/Print';
 import { DailyPage } from './pages/Daily';
 import { WeeklyPage } from './pages/Weekly';
@@ -42,6 +44,8 @@ function Page() {
       return <MonthlyPage month={isMonth(p[0]) ? p[0] : today.slice(0, 7)} />;
     case 'yearly':
       return <YearlyPage year={isYear(p[0]) ? p[0] : today.slice(0, 4)} />;
+    case 'routines':
+      return <RoutinesPage />;
     case 'compass':
       return <CompassPage week={weekStart(isDate(p[0]) ? p[0] : today)} />;
     case 'mos':
@@ -104,6 +108,7 @@ export default function App() {
       <GoalModal />
       <CarryModal />
       <DayModal />
+      <RoutineModal />
       <PrintModal />
       <PrintRoot />
       {toast && <div className="toast" role="status">{toast}</div>}

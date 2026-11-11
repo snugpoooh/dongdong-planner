@@ -3,6 +3,8 @@ import { BellRing, CircleCheck, Clock, Compass, LayoutList, NotebookPen, Plus, S
 import { Card, DatePickButton, PageHead, PrevNext, Seg } from '../components/ui';
 import { TaskRow } from '../components/tasks';
 import { DayTimeline, EventList } from '../components/Timeline';
+import { RoutineCard } from '../components/RoutineCard';
+import { markOf, routinesOn } from '../lib/routines';
 import { useStore } from '../store/store';
 import { openEvent, openTask, useUi } from '../store/ui';
 import { GROUP_LABEL, occurrencesOn, progressOf, tasksOnDate } from '../store/selectors';
@@ -32,6 +34,7 @@ export function DailyPage({ date }: { date: string }) {
       <div className="grid-2">
         <div className="stack">
           <PrioritiesCard date={date} />
+          <RoutineCard date={date} today={today} />
           <NotesCard key={date} date={date} />
         </div>
         <div className="stack">
@@ -269,7 +272,13 @@ function NotesCard({ date }: { date: string }) {
 
 function ScheduleCard({ date, isToday }: { date: string; isToday: boolean }) {
   const events = useStore((s) => s.events);
+  const routinesAll = useStore((s) => s.routines);
+  const checks = useStore((s) => s.routineChecks);
   const occ = useMemo(() => occurrencesOn(events, date), [events, date]);
+  const timedRoutines = useMemo(
+    () => routinesOn(routinesAll, date).filter((r) => r.time).map((r) => ({ r, mark: markOf(checks, date, r.id) })),
+    [routinesAll, checks, date],
+  );
   const [mode, setMode] = useState<'grid' | 'list'>(() => (localStorage.getItem('dongdong.scheduleMode') as 'grid' | 'list') || 'grid');
   const tlRef = useRef<HTMLDivElement>(null);
   const changeMode = (m: 'grid' | 'list') => {
@@ -316,7 +325,27 @@ function ScheduleCard({ date, isToday }: { date: string; isToday: boolean }) {
       <div className="tiny" style={{ color: 'var(--ink-2)', marginBottom: 8 }}>
         빈 시간대를 눌러 일정 추가 · ◇ 종료 시간 미정
       </div>
-      {mode === 'grid' ? <DayTimeline date={date} occurrences={occ} isToday={isToday} scrollRef={tlRef} /> : <EventList occurrences={occ} date={date} />}
+      {mode === 'grid' ? (
+        <DayTimeline date={date} occurrences={occ} routines={timedRoutines} isToday={isToday} scrollRef={tlRef} />
+      ) : (
+        <>
+          <EventList occurrences={occ} date={date} />
+          {timedRoutines.length > 0 && (
+            <div className="event-list" style={{ marginTop: 8 }}>
+              {timedRoutines.map(({ r, mark }) => (
+                <div key={r.id} className="event-item routine-item">
+                  <span className="bar" />
+                  <span className="time">{r.time}</span>
+                  <span>
+                    <div className="name">{r.title}</div>
+                    <div className="meta">루틴 · {mark === 'done' ? '완료' : mark === 'skipped' ? '건너뜀' : '아직'}</div>
+                  </span>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
     </Card>
   );
 }
