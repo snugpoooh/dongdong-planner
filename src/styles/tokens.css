@@ -1,0 +1,124 @@
+:root {
+  --font-sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', system-ui, sans-serif;
+  --font-serif: 'Noto Serif KR', 'Nanum Myeongjo', 'AppleMyungjo', Georgia, serif;
+
+  /* paper (light) */
+  --bg: #f5f3ee;
+  --bg-sidebar: #efede7;
+  --card: #fbfaf7;
+  --card-2: #f7f5f0;
+  --field: #f1ede5;
+  --field-strong: #ebe6dc;
+  --line: #e6e1d8;
+  --line-strong: #d6d0c4;
+  --rule: #e9e5dd;
+  --ink: #26282c;
+  --ink-2: #4b4d52;
+  --ink-3: #7c7a75;
+  --ink-4: #a9a59d;
+  --sepia: #8b5a3a;
+  --navy: #2f3b55;
+  --navy-ink: #ffffff;
+  --navy-soft: #e8ebf1;
+  --navy-soft-ink: #2f3b55;
+  --icon-box: #ebedf1;
+  --active: #e3e7ee;
+  --now: #9a3b3b;
+  --now-line: #b45252;
+  --danger: #a2393f;
+  --ok: #2f6a46;
+
+  --a-bg: #e2eee4;
+  --a-ink: #2e6a46;
+  --b-bg: #f4e7d1;
+  --b-ink: #8a5a1c;
+  --c-bg: #e2e8f3;
+  --c-ink: #3a5583;
+  --q1-bg: #f5e0e1;
+  --q1-ink: #a2393f;
+  --q2-bg: #e1eee3;
+  --q2-ink: #2e6a46;
+  --q3-bg: #f4e8d4;
+  --q3-ink: #8a6a2c;
+
+  --today: #f5ead6;
+  --today-line: #c9a46b;
+  --sat: #e6ebf3;
+  --sat-ink: #3a5583;
+  --sun: #f4e7e5;
+  --sun-ink: #9a3b3b;
+  --other-month: #efebe4;
+  --past: #e3e6ec;
+  --event-bg: #f4e9d5;
+  --event-line: #b08d57;
+  --event-ink: #5d4426;
+
+  --shadow-sm: 0 1px 2px rgba(40, 32, 20, 0.04);
+  --shadow-md: 0 8px 30px rgba(40, 32, 20, 0.12), 0 2px 6px rgba(40, 32, 20, 0.06);
+  --shadow-fab: 0 6px 18px rgba(30, 40, 60, 0.28);
+  --scrim: rgba(40, 36, 30, 0.42);
+
+  --radius: 10px;
+  --radius-sm: 7px;
+  --sidebar-w: 216px;
+  --topbar-h: 58px;
+  color-scheme: light;
+}
+
+:root[data-theme='dark'] {
+  --bg: #1c1c1c;
+  --bg-sidebar: #1f1f1f;
+  --card: #242424;
+  --card-2: #212121;
+  --field: #2c2b29;
+  --field-strong: #333230;
+  --line: #333333;
+  --line-strong: #444444;
+  --rule: #333231;
+  --ink: #ecebe8;
+  --ink-2: #c9c7c2;
+  --ink-3: #9a978f;
+  --ink-4: #6f6c66;
+  --sepia: #d09a72;
+  --navy: #3c4a69;
+  --navy-ink: #ffffff;
+  --navy-soft: #2f3647;
+  --navy-soft-ink: #dfe5f2;
+  --icon-box: #30343d;
+  --active: #34405a;
+  --now: #a54343;
+  --now-line: #c25b5b;
+  --danger: #e07a7f;
+  --ok: #7cc097;
+
+  --a-bg: #263a2d;
+  --a-ink: #8fd0a8;
+  --b-bg: #3e3222;
+  --b-ink: #e3b878;
+  --c-bg: #26324a;
+  --c-ink: #a9bfe6;
+  --q1-bg: #4a2a2d;
+  --q1-ink: #f0a3a8;
+  --q2-bg: #24392b;
+  --q2-ink: #8fd0a8;
+  --q3-bg: #3d3323;
+  --q3-ink: #e1c084;
+
+  --today: #3a3226;
+  --today-line: #b08d57;
+  --sat: #262d3a;
+  --sat-ink: #a9bfe6;
+  --sun: #382727;
+  --sun-ink: #eaa3a3;
+  --other-month: #202020;
+  --past: #30343c;
+  --event-bg: #3c3222;
+  --event-line: #b08d57;
+  --event-ink: #f0d9b0;
+
+  --shadow-sm: none;
+  --shadow-md: 0 10px 34px rgba(0, 0, 0, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+  --shadow-fab: 0 6px 18px rgba(0, 0, 0, 0.5);
+  --scrim: rgba(0, 0, 0, 0.55);
+  color-scheme: dark;
+}

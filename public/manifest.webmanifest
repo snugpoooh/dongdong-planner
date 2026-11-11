@@ -1,0 +1,17 @@
+{
+  "name": "동동 플래너",
+  "short_name": "동동",
+  "description": "종이의 온기, 디지털의 명료함 — 삶의 방향에서 오늘의 할 일까지 잇는 1D2P 디지털 플래너",
+  "lang": "ko",
+  "start_url": "./#/daily",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f3ee",
+  "theme_color": "#f5f3ee",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

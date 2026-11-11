@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ko" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#f5f3ee" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="동동" />
+    <meta name="description" content="종이의 온기, 디지털의 명료함 — 삶의 방향에서 오늘의 할 일까지 잇는 1D2P 디지털 플래너" />
+    <link rel="manifest" href="./manifest.webmanifest" />
+    <link rel="icon" type="image/svg+xml" href="./icons/icon.svg" />
+    <link rel="apple-touch-icon" href="./icons/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css" />
+    <title>동동 · Digital Planner</title>
+    <script>
+      // Apply the saved theme before first paint to avoid a flash.
+      try {
+        var s = JSON.parse((localStorage.getItem('dongdong-planner-v1') || localStorage.getItem('folio-planner-v1')) || '{}').state || {};
+        var st = s.settings || {};
+        var mode = st.theme || 'auto';
+        var h = new Date().getHours();
+        var eff = mode === 'auto' ? (h >= (st.autoLightFrom ?? 7) && h < (st.autoLightTo ?? 19) ? 'light' : 'dark') : mode;
+        document.documentElement.dataset.theme = eff;
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

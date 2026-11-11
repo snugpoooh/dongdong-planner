@@ -1,0 +1,336 @@
+/* ---------- PDF preview (screen) ---------- */
+.print-preview {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  background: #1b1b1b;
+  color: #eee;
+  overflow-y: auto;
+  font-family: var(--font-sans);
+}
+.pp-bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px max(24px, calc((100% - 1100px) / 2));
+  background: #1b1b1b;
+  border-bottom: 1px solid #333;
+}
+.pp-title {
+  font-size: 18px;
+  font-weight: 800;
+}
+.pp-sub {
+  font-size: 11.5px;
+  color: #aaa;
+}
+.pp-btn {
+  background: #2a2a2a;
+  color: #eee;
+  border: 1px solid #3a3a3a;
+}
+.pp-btn:hover {
+  background: #333;
+}
+.pp-pages {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 24px;
+  padding: 28px 16px 60px;
+}
+.sheet {
+  background: #fff;
+  color: #1d1d1f;
+  border-radius: 6px;
+  box-shadow: 0 6px 30px rgba(0, 0, 0, 0.5);
+  padding: 34px 38px;
+  font-size: 11px;
+  line-height: 1.45;
+  overflow: hidden;
+  --sh-line: #d9d6cf;
+}
+.sheet.portrait {
+  width: 794px;
+  min-height: 1123px;
+}
+.sheet.landscape {
+  width: 1123px;
+  min-height: 794px;
+}
+.sh-head {
+  border-bottom: 2px solid #333;
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+}
+.sh-kicker {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  color: #6b6b6b;
+}
+.sh-title {
+  font-family: var(--font-serif);
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.sh-title small {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  color: #666;
+  margin-left: 6px;
+}
+.sh-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 22px;
+}
+.sh-cols.daily {
+  grid-template-columns: 1.15fr 1fr;
+}
+.sh-sec,
+.sh-side {
+  font-weight: 800;
+  font-size: 12px;
+  border-left: 3px solid #333;
+  background: #f2f1ee;
+  padding: 3px 8px;
+  margin-bottom: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+.sh-sec span {
+  font-weight: 500;
+  color: #666;
+}
+.sh-group {
+  margin-bottom: 8px;
+}
+.sh-glabel {
+  font-size: 10px;
+  font-weight: 700;
+  color: #6b6b6b;
+  margin: 4px 0 2px;
+}
+.sh-task {
+  display: flex;
+  gap: 6px;
+  align-items: baseline;
+  padding: 3px 0;
+  border-bottom: 1px solid #eee;
+}
+.sh-task .g {
+  width: 12px;
+  text-align: center;
+  font-weight: 700;
+}
+.sh-task .n {
+  flex: 1;
+}
+.sh-task .q {
+  font-size: 9px;
+  font-weight: 800;
+  color: #a2393f;
+}
+.sh-task .m {
+  font-size: 9px;
+  color: #3a5583;
+}
+.sh-task.s-done .n,
+.sh-task.s-cancelled .n {
+  text-decoration: line-through;
+  color: #888;
+}
+.sh-note {
+  white-space: pre-wrap;
+  font-size: 11px;
+  min-height: 16px;
+}
+.sh-lines {
+  background-image: repeating-linear-gradient(to bottom, transparent 0, transparent 21px, var(--sh-line) 21px, var(--sh-line) 22px);
+}
+.sh-hours {
+  border-top: 1px solid var(--sh-line);
+}
+.sh-hour {
+  display: flex;
+  gap: 8px;
+  min-height: 36px;
+  border-bottom: 1px solid var(--sh-line);
+  padding: 2px 0;
+}
+.sh-hour .hh {
+  width: 20px;
+  color: #777;
+  font-size: 10px;
+  font-variant-numeric: tabular-nums;
+}
+.sh-hour .ev {
+  display: flex;
+  flex-direction: column;
+  font-size: 10.5px;
+}
+.sh-small {
+  font-size: 10.5px;
+  margin: 2px 0;
+}
+.sh-small.red,
+.red {
+  color: #a2393f;
+}
+.sheet .muted {
+  color: #888;
+}
+.sh-week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border: 1px solid var(--sh-line);
+  min-height: 470px;
+}
+.sh-wday {
+  border-left: 1px solid var(--sh-line);
+  padding: 6px;
+  min-width: 0;
+}
+.sh-wday:first-child {
+  border-left: 0;
+}
+.sh-wday.sun .sh-wdate {
+  color: #a2393f;
+}
+.sh-wday.sat .sh-wdate {
+  color: #3a5583;
+}
+.sh-wdate {
+  font-weight: 800;
+  font-size: 12px;
+  border-bottom: 1px solid var(--sh-line);
+  padding-bottom: 4px;
+  margin-bottom: 4px;
+}
+.sh-wdate small {
+  font-weight: 500;
+  font-size: 10px;
+}
+.sh-ev {
+  font-size: 10px;
+  background: #f6efe2;
+  border-left: 2px solid #b08d57;
+  padding: 1px 4px;
+  margin-bottom: 3px;
+}
+.sh-wtasks .sh-task {
+  font-size: 10px;
+}
+.sh-month {
+  display: grid;
+  grid-template-columns: 1fr 250px;
+  gap: 18px;
+}
+.sh-mgrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  border-top: 1px solid var(--sh-line);
+  border-left: 1px solid var(--sh-line);
+}
+.sh-mdow {
+  text-align: center;
+  font-weight: 700;
+  background: #f2f1ee;
+  padding: 4px 0;
+  border-right: 1px solid var(--sh-line);
+  border-bottom: 1px solid var(--sh-line);
+}
+.sh-mcell {
+  min-height: 74px;
+  border-right: 1px solid var(--sh-line);
+  border-bottom: 1px solid var(--sh-line);
+  padding: 4px 5px;
+  overflow: hidden;
+}
+.sh-mcell.out {
+  background: #f5f4f1;
+}
+.sh-mcell .d {
+  font-weight: 800;
+  font-size: 11px;
+}
+.sh-mcell .e {
+  font-size: 9.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.sh-evlist {
+  columns: 2;
+  column-gap: 24px;
+}
+.sh-year {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 24px;
+}
+.sh-ymt {
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  font-size: 11px;
+  border-top: 1px solid var(--sh-line);
+  padding-top: 6px;
+  margin-bottom: 4px;
+}
+.sh-ygrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  text-align: center;
+  font-size: 10px;
+  gap: 2px 0;
+  font-variant-numeric: tabular-nums;
+}
+.sh-ygrid .h {
+  color: #888;
+  font-size: 8.5px;
+}
+
+/* ---------- actual printing ---------- */
+@media print {
+  html,
+  body {
+    background: #fff !important;
+    height: auto !important;
+  }
+  body > *:not(.print-preview) {
+    display: none !important;
+  }
+  .print-preview {
+    position: static;
+    background: #fff;
+    overflow: visible;
+  }
+  .pp-bar {
+    display: none !important;
+  }
+  .pp-pages {
+    display: block;
+    padding: 0;
+  }
+  .sheet {
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    width: auto !important;
+    min-height: 0 !important;
+    break-after: page;
+    page-break-after: always;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .sheet:last-child {
+    break-after: auto;
+    page-break-after: auto;
+  }
+}
