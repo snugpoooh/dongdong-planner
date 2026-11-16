@@ -62,6 +62,24 @@ export interface Occurrence {
   startMin: number | null;
   endMin: number | null;
   multiDay: boolean;
+  /** Set for events read from a Google Calendar (read-only). */
+  ext?: {
+    cal: string;
+    calName: string;
+    color: string;
+    location?: string;
+    description?: string;
+    item: { s: number; e: number; allDay: boolean; sd?: string; ed?: string };
+  };
+}
+
+/** A Google Calendar shown read-only through its iCal address. */
+export interface GCalendar {
+  id: string;
+  name: string;
+  url: string;
+  color: string;
+  enabled: boolean;
 }
 
 export interface Milestone {
@@ -179,6 +197,7 @@ export interface Settings {
   sundayLabel: string; // '주일' | '일요일'
   reviewReminders: boolean;
   dismissedReminders: string[];
+  calendars: GCalendar[];
 }
 
 /** A habit repeated on chosen weekdays; it shows up in each matching day automatically. */

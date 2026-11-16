@@ -39,6 +39,7 @@ npm run preview    # 빌드 결과 확인 (http://localhost:4173)
 | **검색** | ⌘K 전체 검색, 노트 검색(자유 노트·메모·Review·목표 기록) |
 | **PDF** | 일간/주간/월간/연간을 기간 지정해 A4로 출력(미리보기 → 인쇄 → PDF로 저장) |
 | **테마** | 시간대에 따라 자동(기본 7–19시 라이트) · 라이트 · 다크 |
+| **구글 캘린더** | 설정에서 구글 캘린더의 iCal 비공개 주소를 연결하면 그 일정이 Daily·Weekly 시간표(종일 줄 포함)에 캘린더 색으로 보임. 반복·예외·취소·여러 날 일정 처리, 5분마다·화면 복귀 시 새로고침, 읽기 전용 상세 보기. 브라우저 대신 `api/ical` 함수가 구글 주소만 로그인한 사용자에게 중계 |
 | **계정** | 이메일 회원가입·로그인, 인증 메일, 비밀번호 재설정, 기기 간 동기화 |
 | **기타** | 휴지통(되살리기/완전 삭제), 2026–2027 한국 공휴일, 반응형(Mac·iPad 2열 / iPhone 1열·햄버거 메뉴), 오프라인 동작 |
 
@@ -59,7 +60,7 @@ npm run dev
 
 ## 아직 없는 것
 
-- Google 캘린더 연동, 소셜 로그인(Google·카카오 등).
+- 구글 캘린더에 일정 쓰기(지금은 읽기만), 소셜 로그인(Google·카카오 등).
 
 ## 구조
 
@@ -70,4 +71,5 @@ src/
   components/ Shell · TaskModal · StatusModal · EventModal · Timeline · PlanCards · GoalModal · DayModal · InboxModal · SearchModal · TriageModal · Print
   lib/        date · holidays · router · hooks · reminders · sample · supabase · sync · merge · routines
 public/       manifest.webmanifest · sw.js · icons/
+api/          ical.ts (구글 캘린더 iCal 중계, Vercel Function)
 ```

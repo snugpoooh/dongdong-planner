@@ -9,6 +9,7 @@ import { TriageModal } from './components/TriageModal';
 import { GoalModal, CarryModal } from './components/GoalModal';
 import { DayModal } from './components/DayModal';
 import { RoutineModal } from './components/RoutineModal';
+import { GcalModal, useGcalAutoRefresh } from './components/GcalBits';
 import { RoutinesPage } from './pages/Routines';
 import { PrintModal, PrintRoot } from './components/Print';
 import { DailyPage } from './pages/Daily';
@@ -73,6 +74,7 @@ export default function App() {
   const toast = useUi((s) => s.toast);
   const sundayLabel = useStore((s) => s.settings.sundayLabel);
   setSundayLabel(sundayLabel);
+  useGcalAutoRefresh();
 
   useEffect(() => {
     if (!window.location.hash) window.location.replace(`#/daily/${todayKey()}`);
@@ -109,6 +111,7 @@ export default function App() {
       <CarryModal />
       <DayModal />
       <RoutineModal />
+      <GcalModal />
       <PrintModal />
       <PrintRoot />
       {toast && <div className="toast" role="status">{toast}</div>}

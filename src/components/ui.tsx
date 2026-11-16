@@ -114,7 +114,7 @@ export function Modal({
   );
 }
 
-export function ModalHead({ kicker, title, onClose }: { kicker?: string; title: ReactNode; onClose: () => void }) {
+export function ModalHead({ kicker, title, onClose }: { kicker?: ReactNode; title: ReactNode; onClose: () => void }) {
   return (
     <div className="modal-head">
       <div>

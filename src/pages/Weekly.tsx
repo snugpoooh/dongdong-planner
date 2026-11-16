@@ -3,8 +3,10 @@ import { Clock, Plus } from 'lucide-react';
 import { Card, PageHead, PrevNext } from '../components/ui';
 import { Block, HOUR_PX, placeDay } from '../components/Timeline';
 import { markOf, routinesOn } from '../lib/routines';
+import { gcalOccurrencesOn, useGcal } from '../lib/gcal';
+import { GcalRefresh } from '../components/GcalBits';
 import { useStore } from '../store/store';
-import { openEvent } from '../store/ui';
+import { openEvent, openOccurrence } from '../store/ui';
 import { occurrencesOn } from '../store/selectors';
 import { addDays, dow, dowLong, hhmm, mdDot, weekDays, weekRangeLabel, weekStart } from '../lib/date';
 import { useNowMinutes, useToday } from '../lib/hooks';
@@ -15,7 +17,12 @@ export function WeeklyPage({ week }: { week: string }) {
   const today = useToday();
   const events = useStore((s) => s.events);
   const days = weekDays(week);
-  const occ = useMemo(() => days.map((d) => occurrencesOn(events, d)), [events, week]); // eslint-disable-line react-hooks/exhaustive-deps
+  const gIndex = useGcal((s) => s.index);
+  const calendars = useStore((s) => s.settings.calendars);
+  const occ = useMemo(
+    () => days.map((d) => [...occurrencesOn(events, d), ...gcalOccurrencesOn(gIndex, calendars ?? [], d)]),
+    [events, week, gIndex, calendars], // eslint-disable-line react-hooks/exhaustive-deps
+  );
   const routinesAll = useStore((s) => s.routines);
   const checks = useStore((s) => s.routineChecks);
   const routinesByDay = useMemo(
@@ -50,6 +57,7 @@ export function WeeklyPage({ week }: { week: string }) {
         title="주간 시간표"
         actions={
           <>
+            <GcalRefresh />
             <button className="icon-btn" aria-label="현재 시각으로" onClick={scrollToNow} disabled={todayIdx < 0}>
               <Clock />
             </button>
@@ -83,7 +91,12 @@ export function WeeklyPage({ week }: { week: string }) {
                   {list
                     .filter((o) => o.startMin == null)
                     .map((o) => (
-                      <button key={o.event.id} onClick={() => openEvent(undefined, o.event.id, days[i])}>
+                      <button
+                        key={o.event.id}
+                        className={o.ext ? 'gcal' : ''}
+                        style={o.ext ? ({ '--gc': o.ext.color } as React.CSSProperties) : undefined}
+                        onClick={() => openOccurrence(o, days[i])}
+                      >
                         {o.event.title}
                       </button>
                     ))}

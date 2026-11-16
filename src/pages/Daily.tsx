@@ -5,6 +5,8 @@ import { TaskRow } from '../components/tasks';
 import { DayTimeline, EventList } from '../components/Timeline';
 import { RoutineCard } from '../components/RoutineCard';
 import { markOf, routinesOn } from '../lib/routines';
+import { useGcalOn } from '../lib/gcal';
+import { GcalRefresh } from '../components/GcalBits';
 import { useStore } from '../store/store';
 import { openEvent, openTask, useUi } from '../store/ui';
 import { GROUP_LABEL, occurrencesOn, progressOf, tasksOnDate } from '../store/selectors';
@@ -274,7 +276,11 @@ function ScheduleCard({ date, isToday }: { date: string; isToday: boolean }) {
   const events = useStore((s) => s.events);
   const routinesAll = useStore((s) => s.routines);
   const checks = useStore((s) => s.routineChecks);
-  const occ = useMemo(() => occurrencesOn(events, date), [events, date]);
+  const gOcc = useGcalOn(date);
+  const occ = useMemo(
+    () => [...occurrencesOn(events, date), ...gOcc].sort((a, b) => (a.startMin ?? -1) - (b.startMin ?? -1)),
+    [events, date, gOcc], // eslint-disable-line react-hooks/exhaustive-deps
+  );
   const timedRoutines = useMemo(
     () => routinesOn(routinesAll, date).filter((r) => r.time).map((r) => ({ r, mark: markOf(checks, date, r.id) })),
     [routinesAll, checks, date],
@@ -318,6 +324,7 @@ function ScheduleCard({ date, isToday }: { date: string; isToday: boolean }) {
         />
         <span className="spacer" />
         {occ.length > 0 && <span className="tiny muted">{occ.length}개 일정</span>}
+        <GcalRefresh />
         <button className="icon-btn" aria-label="현재 시각으로 이동" title="현재 시각으로" onClick={scrollToNow}>
           <Clock />
         </button>

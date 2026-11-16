@@ -4,7 +4,7 @@ import { hhmm, minutesOf } from '../lib/date';
 import { useNowMinutes } from '../lib/hooks';
 import { layoutItems, timeRange } from '../store/selectors';
 import { useStore } from '../store/store';
-import { openEvent } from '../store/ui';
+import { openEvent, openOccurrence } from '../store/ui';
 import type { Occurrence, Routine, RoutineMark } from '../store/types';
 
 export const HOUR_PX = 33;
@@ -40,12 +40,13 @@ export function Block({ item, start, end, col, cols, date, inset = 1 }: { item: 
   const oneLine = end - start < 58 ? 'one-line' : '';
   if (item.kind === 'event') {
     const o = item.o;
+    const g = o.ext;
     return (
       <button
-        className={`tl-event ${o.endMin == null ? 'open-end' : ''} ${oneLine}`}
-        style={style}
-        onClick={() => openEvent(undefined, o.event.id, date)}
-        title={`${timeRange(o)} ${o.event.title}`}
+        className={`tl-event ${g ? 'tl-gcal' : ''} ${o.endMin == null ? 'open-end' : ''} ${oneLine}`}
+        style={g ? ({ ...style, '--gc': g.color } as React.CSSProperties) : style}
+        onClick={() => openOccurrence(o, date)}
+        title={`${g ? `${g.calName} · ` : ''}${timeRange(o)} ${o.event.title}`}
       >
         <div className="t">{timeRange(o)}</div>
         <div className="n">{o.event.title}</div>
@@ -93,7 +94,12 @@ export function DayTimeline({
       {allDay.length > 0 && (
         <div className="allday">
           {allDay.map((o) => (
-            <button key={o.event.id} onClick={() => openEvent(undefined, o.event.id, date)}>
+            <button
+              key={o.event.id}
+              className={o.ext ? 'gcal' : ''}
+              style={o.ext ? ({ '--gc': o.ext.color } as React.CSSProperties) : undefined}
+              onClick={() => openOccurrence(o, date)}
+            >
               {o.event.title}
               {o.multiDay ? ' ↔' : ''}
             </button>
@@ -135,8 +141,8 @@ export function EventList({ occurrences, date, withDate }: { occurrences: Occurr
   return (
     <div className="event-list">
       {occurrences.map((o) => (
-        <button key={`${o.event.id}-${o.date}`} className="event-item" onClick={() => openEvent(undefined, o.event.id, date ?? o.date)}>
-          <span className="bar" />
+        <button key={`${o.event.id}-${o.date}`} className="event-item" onClick={() => openOccurrence(o, date ?? o.date)}>
+          <span className="bar" style={o.ext ? { background: o.ext.color } : undefined} />
           <span className="time">{o.event.allDay ? '종일' : o.event.startTime ?? ''}</span>
           <span>
             <div className="name">{o.event.title}</div>

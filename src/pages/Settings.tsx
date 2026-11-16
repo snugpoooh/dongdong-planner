@@ -8,6 +8,7 @@ import { sampleData } from '../lib/sample';
 import { todayKey } from '../lib/date';
 import type { PlannerData, Role } from '../store/types';
 import { flushSync, signOutAndClear, useAuth } from '../lib/sync';
+import { GoogleCalendarCard } from '../components/GcalBits';
 import { authMessage, supabase } from '../lib/supabase';
 
 function ListEditor({ items, onChange, addLabel, min = 0 }: { items: Role[]; onChange: (v: Role[]) => void; addLabel: string; min?: number }) {
@@ -168,6 +169,7 @@ export function SettingsPage() {
         </div>
         <div className="stack">
           <AccountCard />
+          <GoogleCalendarCard />
           <Card kicker="Calendar" title="달력과 표시">
             <div className="settings-row">
               <span className="small" style={{ fontWeight: 700 }}>

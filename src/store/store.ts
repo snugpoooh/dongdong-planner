@@ -49,6 +49,7 @@ export const DEFAULT_SETTINGS: Settings = {
   sundayLabel: '주일',
   reviewReminders: true,
   dismissedReminders: [],
+  calendars: [],
 };
 
 export const emptyMos = (): MosContent => ({ mission: '', objectives: [], strategies: [] });

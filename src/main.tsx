@@ -24,9 +24,10 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
 
 if (import.meta.env.DEV) {
   // Dev-only helpers for manual QA.
-  Promise.all([import('./store/store'), import('./lib/sample')]).then(([store, sample]) => {
+  Promise.all([import('./store/store'), import('./lib/sample'), import('./lib/gcal')]).then(([store, sample, gcal]) => {
     (window as unknown as { __dongdong: unknown }).__dongdong = {
       store: store.useStore,
+      gcal: gcal.useGcal,
       loadSample: () => store.useStore.getState().replaceAll(sample.sampleData()),
     };
   });

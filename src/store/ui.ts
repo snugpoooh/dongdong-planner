@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { PlanEvent, Task } from './types';
+import type { Occurrence, PlanEvent, Task } from './types';
 
 export type PrintKind = 'daily' | 'weekly' | 'monthly' | 'yearly';
 
@@ -15,6 +15,7 @@ interface UiState {
   dayModal: string | null;
   carry: { scope: 'month' | 'year'; from: string; to: string } | null;
   routineModal: { id?: string } | null;
+  gcalEvent: Occurrence | null;
   navOpen: boolean;
   toast: string | null;
   set: (patch: Partial<Omit<UiState, 'set' | 'notify'>>) => void;
@@ -35,6 +36,7 @@ export const useUi = create<UiState>((set) => ({
   dayModal: null,
   carry: null,
   routineModal: null,
+  gcalEvent: null,
   navOpen: false,
   toast: null,
   set: (patch) => set(patch),
@@ -50,3 +52,6 @@ export const openEvent = (defaults?: Partial<PlanEvent>, id?: string, occurrence
   useUi.getState().set({ eventModal: { id, defaults, occurrenceDate } });
 export const openStatus = (id: string) => useUi.getState().set({ statusFor: id });
 export const openRoutine = (id?: string) => useUi.getState().set({ routineModal: { id } });
+/** Open an occurrence: planner events go to the editor, Google events to a read-only sheet. */
+export const openOccurrence = (o: Occurrence, date?: string) =>
+  o.ext ? useUi.getState().set({ gcalEvent: o }) : openEvent(undefined, o.event.id, date ?? o.date);

@@ -3224,3 +3224,82 @@ mark {
     font-size: 26px;
   }
 }
+
+/* ---------- google calendar ---------- */
+.tl-event.tl-gcal {
+  background: color-mix(in srgb, var(--gc) 15%, var(--card));
+  border-color: color-mix(in srgb, var(--gc) 40%, transparent);
+  border-left-color: var(--gc);
+  color: var(--ink);
+}
+.tl-event.tl-gcal .t {
+  color: var(--ink-2);
+  opacity: 1;
+}
+.allday button.gcal,
+.week-allday button.gcal {
+  background: color-mix(in srgb, var(--gc) 15%, var(--card));
+  border-left-color: var(--gc);
+  color: var(--ink);
+}
+.gcal-refresh {
+  color: var(--ink-3);
+}
+.gcal-refresh.err {
+  color: var(--danger);
+}
+.cal-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex: none;
+}
+.gcal-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
+}
+.gcal-row .input {
+  height: 34px;
+}
+.gcal-status {
+  grid-column: 1 / -1;
+  font-size: 11.5px;
+  color: var(--ink-3);
+}
+.gcal-status.err {
+  color: var(--danger);
+}
+.gcal-colors {
+  display: flex;
+  gap: 4px;
+}
+.gcal-colors button {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--card);
+  box-shadow: 0 0 0 1px var(--line);
+}
+.gcal-colors button.on {
+  box-shadow: 0 0 0 2px var(--ink);
+}
+.gcal-steps {
+  margin: 4px 0 0;
+  padding-left: 20px;
+  font-size: 12.5px;
+  color: var(--ink-2);
+  line-height: 1.7;
+}
+@media (max-width: 860px) {
+  .gcal-row {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+  .gcal-colors {
+    grid-column: 1 / -1;
+  }
+}

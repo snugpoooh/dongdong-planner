@@ -3,6 +3,7 @@ import type { RealtimeChannel, Session } from '@supabase/supabase-js';
 import { supabase } from './supabase';
 import { DATA_SECTIONS, exportData, initialData, STORAGE_KEY, useStore } from '../store/store';
 import { isEmptyPlanner, mergePlanner } from './merge';
+import { clearGcalCache } from './gcal';
 import type { PlannerData } from '../store/types';
 
 export type SyncStatus = 'idle' | 'loading' | 'saving' | 'saved' | 'offline' | 'error';
@@ -299,6 +300,7 @@ export async function signOutAndClear() {
   try {
     localStorage.removeItem(STORAGE_KEY);
     localStorage.removeItem('folio-planner-v1'); // pre-rename cache
+    clearGcalCache();
     localStorage.removeItem(OWNER_KEY);
     if (uid) localStorage.removeItem(metaKey(uid));
   } catch {
