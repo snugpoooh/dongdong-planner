@@ -2,6 +2,7 @@
  * Fetches a Google Calendar iCal feed on behalf of a signed-in DongDong user.
  * Browsers can't read these feeds directly (no CORS), so the app asks this function.
  * Only Google Calendar iCal addresses are allowed, so it can't be used as an open proxy.
+ * The address is a secret, so it travels in the POST body (never in the URL, which ends up in logs).
  */
 
 const ALLOWED_HOSTS = new Set(['calendar.google.com', 'www.google.com']);
@@ -42,8 +43,15 @@ async function signedIn(request: Request, env: Env): Promise<boolean> {
 }
 
 export async function handleIcal(request: Request, env: Env): Promise<Response> {
-  if (request.method !== 'GET') return json(405, 'GET만 지원합니다.');
-  const target = normalizeIcalUrl(new URL(request.url).searchParams.get('url'));
+  if (request.method !== 'POST') return json(405, 'POST만 지원합니다.');
+  let raw: string | null = null;
+  try {
+    const body = (await request.json()) as { url?: unknown };
+    raw = typeof body.url === 'string' ? body.url : null;
+  } catch {
+    raw = null;
+  }
+  const target = normalizeIcalUrl(raw);
   if (!target) return json(400, '구글 캘린더의 iCal 주소(…/calendar/ical/…/basic.ics)만 쓸 수 있습니다.');
   if (!(await signedIn(request, env))) return json(401, '로그인이 필요합니다.');
 

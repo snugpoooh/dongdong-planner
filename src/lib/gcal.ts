@@ -190,7 +190,12 @@ export function refreshCalendars(opts: { force?: boolean; only?: string } = {}):
 
 async function fetchFeed(url: string): Promise<string> {
   const token = (await supabase?.auth.getSession())?.data.session?.access_token;
-  const r = await fetch(`/api/ical?url=${encodeURIComponent(url)}`, { headers: token ? { authorization: `Bearer ${token}` } : {} });
+  // The iCal address is a secret: send it in the body, never in the request URL.
+  const r = await fetch('/api/ical', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json', ...(token ? { authorization: `Bearer ${token}` } : {}) },
+    body: JSON.stringify({ url }),
+  });
   if (!r.ok) {
     let msg = `불러오지 못했습니다 (${r.status}).`;
     try {
