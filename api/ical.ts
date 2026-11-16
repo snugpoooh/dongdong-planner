@@ -1,4 +1,4 @@
-import { handleIcal } from './_lib/icalProxy';
+import { handleIcal } from './_lib/icalProxy.js'; // Node ESM needs the extension
 
 // Vercel Function (Node.js runtime, Web-standard handler): GET /api/ical?url=<google ical address>
 export function GET(request: Request) {
